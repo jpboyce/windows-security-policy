@@ -1,21 +1,22 @@
-resource_name :security_policy
+resource_name :windows_security_policy
 
 default_action :configure
 
-property :policy_template, String, required: false, default: 'C:\Windows\security\templates\chefNewPolicy.inf'
+# property :secedit_template, String, required: false, default: 'C:\Windows\security\templates\chefNewPolicy.inf'
+property :secedit_template, String, required: false
 property :database, String, required: false, default: 'C:\Windows\security\database\chef.sdb'
 property :log_location, String, default: 'C:\Windows\security\logs\chef-secedit.log'
 
 action :configure do
   if node['platform'] == 'windows'
-    template "#{policy_template}" do
-      source 'policy.inf.erb'
-      cookbook 'windows-security-policy'
-      action :create
-    end
+    #template "#{secedit_template}" do
+    #  source 'policy.inf.erb'
+    #  cookbook 'windows-security-policy'
+    #  action :create
+    #end
 
     execute 'Configure security database' do
-      command "Secedit /configure /db #{database} /cfg #{policy_template} /log #{log_location}"
+      command "Secedit /configure /db #{database} /cfg #{secedit_template} /log #{log_location}"
       live_stream true
       action :run
     end
@@ -27,7 +28,7 @@ end
 action :export do
   if node['platform'] == 'windows'
     execute 'Export security database to inf file' do
-      command "Secedit /export /db #{database} /cfg #{policy_template} /log #{log_location}"
+      command "Secedit /export /db #{database} /cfg #{secedit_template} /log #{log_location}"
       live_stream true
       action :run
     end
@@ -44,7 +45,7 @@ action :import do
     end
 
     execute 'Import and create security database' do
-      command "Secedit /import /db #{database} /cfg #{policy_template} /log #{log_location} /overwrite"
+      command "Secedit /import /db #{database} /cfg #{secedit_template} /log #{log_location} /overwrite"
       live_stream true
       action :run
     end
